@@ -43,12 +43,13 @@ fi
 port=3000
 if [ ! -z "$role" ]; then
   cat<<EOF | cmsh
-device roles master
-use $role
-openports
-add ACCEPT net $port tcp 
-set description grafana
-commit
+device foreach -t headnode ( \
+roles; \
+use firewall; \
+openports; \
+add ACCEPT net 3000 tcp; \
+set description grafana; \
+commit)
 EOF
 else
   echo "Make sure to open the local firewall to port $port"
