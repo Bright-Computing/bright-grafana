@@ -1,6 +1,18 @@
 #!/bin/bash
 
-version="7.3.4"
+if [[ "$1" =~ ^[0-9]+\.[0-9]+ ]]; then
+  version=$1
+  echo "Selected version: $version"
+  shift
+else
+  version=$(wget -qO- 'https://github.com/grafana/grafana/releases' | grep '/grafana/grafana/releases/tag/' -m 1  | sed -e 's/^.*v\(.*\)">.*/\1/')
+  if [ -z "$version" ]; then
+    echo "Unable to determine latest grafana version, specify as first command line argument"
+    exit 1
+  fi
+  echo "Latest version: $version"
+fi
+
 source /etc/os-release
 if [ "${ID}" = "centos" ]; then
   wget https://dl.grafana.com/oss/release/grafana-${version}-1.x86_64.rpm
