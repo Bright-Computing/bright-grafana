@@ -158,6 +158,7 @@ datasources:
   withCredentials: true
 
   jsonData:
+     httpMethod: GET
      tlsAuth: true
      tlsSkipVerify: true
      tlsAuthWithCACert: true
