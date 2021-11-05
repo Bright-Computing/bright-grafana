@@ -54,11 +54,12 @@ class ClusterConfig:
             return 2
         return 3
 
-    @property
     def cluster_pythoncm_directory(self):
         if self.version == '8.2':
             return '/cm/local/apps/python2/lib/python2.7/site-packages/pythoncm'
-        return '/cm/local/apps/python37/lib/python3.7/site-packages/pythoncm'
+        elif self.version in ['9.0', '9.1']:
+            return '/cm/local/apps/python37/lib/python3.7/site-packages/pythoncm'
+        return '/cm/local/apps/python39/lib/python3.9/site-packages/pythoncm'
 
     @property
     def pythoncm_directory(self):
