@@ -72,7 +72,7 @@ fi
 
 if [ $disable_ssl_auth_client -gt 0 ]; then
   echo "Disable SSL client CA in the cmdaemon HTTP server"
-  base_dir=$(basedir "$0")
+  base_dir=$(dirname "$0")
   $base_dir/cm-manipulate-advanced-config.py -q "AddSSLClientCA=0"
   if [ $? -gt 0 ]; then
     service cmd restart
