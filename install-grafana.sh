@@ -5,7 +5,7 @@ if [[ "$1" =~ ^[0-9]+\.[0-9]+ ]]; then
   echo "Selected version: $version"
   shift
 else
-  version=$(wget -qO- 'https://github.com/grafana/grafana/releases' | grep -v alpha | grep -v beta | grep '/grafana/grafana/releases/tag/' -m 1  | sed -e 's/^.*v\(.*\)">.*/\1/')
+  version=$(wget -qO- 'https://github.com/grafana/grafana/tags' | grep '/grafana/grafana/releases/tag/' -m 1  | sed -e 's/^.*v\(.*\)">.*/\1/')
   if [ -z "$version" ]; then
     echo "Unable to determine latest grafana version, specify as first command line argument"
     exit 1
