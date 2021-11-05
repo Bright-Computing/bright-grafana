@@ -34,6 +34,7 @@ if [ "$1" = "-d" ]; then
   perl -pi -e s'#;level = info#level = debug#g' /etc/grafana/grafana.ini 
 fi
 
+disable_ssl_auth_client=0
 if [ -e "/etc/cm-release" ]; then
   # As of Bright Computing version 9.x, firewall can be controlled by cmdaemon
   versioninfo=$(cat "/etc/cm-release")
@@ -41,6 +42,7 @@ if [ -e "/etc/cm-release" ]; then
     major=${BASH_REMATCH[1]}
     minor=${BASH_REMATCH[2]}
     if [ "$major" = "9" ]; then
+      disable_ssl_auth_client=1
       if [ "$major" = "0" ]; then
         role="login"
       else
@@ -48,6 +50,7 @@ if [ -e "/etc/cm-release" ]; then
       fi
     fi
   elif [[ "$versioninfo" =~ 'vmaster' || "$versioninfo" =~ 'vtrunk' || "$versioninfo" =~ 'v1trunk' ]]; then
+    disable_ssl_auth_client=1
     role="firewall"
   fi
 fi
@@ -65,4 +68,13 @@ commit)
 EOF
 else
   echo "Make sure to open the local firewall to port $port"
+fi
+
+if [ $disable_ssl_auth_client -gt 0 ]; then
+  echo "Disable SSL client CA in the cmdaemon HTTP server"
+  base_dir=$(basedir "$0")
+  $base_dir/cm-manipulate-advanced-config.py -q "AddSSLClientCA=0"
+  if [ $? -gt 0 ]; then
+    service cmd restart
+  fi
 fi
