@@ -14,7 +14,7 @@ else
 fi
 
 source /etc/os-release
-if [ "${ID}" = "centos" ]; then
+if [ "${ID}" = "rhel" ] || [[ "${ID_LIKE}" =~ .*"rhel".* ]]; then
   wget https://dl.grafana.com/oss/release/grafana-${version}-1.x86_64.rpm
   sudo yum -y install grafana-${version}-1.x86_64.rpm 
 elif [ "${ID}" = "sles" ]; then
