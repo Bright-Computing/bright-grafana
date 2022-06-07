@@ -162,7 +162,8 @@ datasources:
   jsonData:
      httpMethod: GET
      tlsAuth: true
-     tlsSkipVerify: true
+     tlsSkipVerify: false
+     serverName: master.cm.cluster
      tlsAuthWithCACert: true
   secureJsonData:
     tlsCACert: |
