@@ -67,7 +67,7 @@ if [ -e "/etc/cm-release" ]; then
   if [ ! -z "$role" ]; then
     echo "Opening port $port in the headnode firewall for Grafana access"
     cat<<EOF | cmsh
-device foreach -t headnode ( \
+device foreach -t headnode -l firewall -i ( \
 roles; \
 use firewall; \
 openports; \
