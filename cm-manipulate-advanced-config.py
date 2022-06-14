@@ -102,13 +102,13 @@ class Config:
         result += self.post
         return result
 
-    def remove(self, fields: list[str]):
+    def remove(self, fields):  # fields: list[str]):
         old = self.fields
         self.fields = [it for it in self.fields
                        if not any(it.startswith(jt + '=') for jt in fields)]
         self.changed = old != self.fields
 
-    def update(self, fields: list[str]):
+    def update(self, fields):  # fields: list[str]):
         for it in fields:
             index = it.find('=')
             if index > 0:
