@@ -28,7 +28,8 @@ def main():
             if not cluster_config.get_version():
                 print('Failed to determine cluster_config version')
                 return 1
-            print(f'Cluster at {cluster_config.hostname}:{cluster_config.port} is running {cluster_config.version}')
+            cluster_config.get_build_index()
+            print(f'Cluster at {cluster_config.hostname}:{cluster_config.port} is running {cluster_config.version}, build index: {cluster_config.build_index}')
             config_file.clusters.append(cluster_config)
             config_file.save()
     else:
