@@ -12,6 +12,7 @@ class ClusterConfig:
         self.port = port
         self.name = None
         self.version = None
+        self.build_index = None
         self.certificate = None
         self.private_key = None
         self.ca_file = 'pythoncm/etc/cacert.pem'
@@ -40,6 +41,18 @@ class ClusterConfig:
         self.version = response.read().decode('utf-8')
         return len(self.version) > 0
 
+    def get_build_index(self):
+        url = f'https://{self.hostname}:{self.port}/info/build_index'
+        opener = urllib.request.build_opener(HTTPSClientAuthHandler(),
+                                             urllib.request.ProxyHandler({}))
+        request = urllib.request.Request(url)
+        response = opener.open(request)
+        try:
+            self.build_index = int(response.read().decode('utf-8'))
+            return True
+        except ValueError:
+            return False
+
     def save(self):
         return {'hostname': self.hostname,
                 'port': self.port,
@@ -58,8 +71,10 @@ class ClusterConfig:
     def cluster_pythoncm_directory(self):
         if self.version == '8.2':
             return '/cm/local/apps/python2/lib/python2.7/site-packages/pythoncm'
-        elif self.version in ['9.0', '9.1']:
+        if self.version in ['9.0', '9.1']:
             return '/cm/local/apps/python37/lib/python3.7/site-packages/pythoncm'
+        if bool(self.build_index) and self.build_index > 148338:
+            return '/cm/local/apps/cmd/pythoncm/lib/python3.9/site-packages/pythoncm'
         return '/cm/local/apps/python39/lib/python3.9/site-packages/pythoncm'
 
     @property
