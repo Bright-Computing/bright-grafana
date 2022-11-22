@@ -37,20 +37,24 @@ class ClusterConfig:
         opener = urllib.request.build_opener(HTTPSClientAuthHandler(),
                                              urllib.request.ProxyHandler({}))
         request = urllib.request.Request(url)
-        response = opener.open(request)
-        self.version = response.read().decode('utf-8')
-        return len(self.version) > 0
+        try:
+            response = opener.open(request)
+            self.version = response.read().decode('utf-8')
+            return len(self.version) > 0
+        except urllib.error.URLError as e:
+            print(e)
+            return False
 
     def get_build_index(self):
         url = f'https://{self.hostname}:{self.port}/info/build_index'
         opener = urllib.request.build_opener(HTTPSClientAuthHandler(),
                                              urllib.request.ProxyHandler({}))
         request = urllib.request.Request(url)
-        response = opener.open(request)
         try:
+            response = opener.open(request)
             self.build_index = int(response.read().decode('utf-8'))
             return True
-        except ValueError:
+        except urllib.error.URLError:
             return False
 
     def save(self):
