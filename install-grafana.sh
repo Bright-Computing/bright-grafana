@@ -27,7 +27,7 @@ elif [ "${ID}" = "ubuntu" ]; then
   apt install -y apt-transport-https
   apt install -y software-properties-common wget
   wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
-  echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list
+  echo "deb https://apt.grafana.com stable main" > /etc/apt/sources.list.d/grafana.list
   apt update
   apt install -y grafana 
   echo "Complete"
