@@ -24,8 +24,7 @@ elif [ "${ID}" = "sles" ]; then
 elif [ "${ID}" = "ubuntu" ]; then
   echo "Installing Grafana OSS repo and latest stable version"
   apt update
-  apt install -y apt-transport-https
-  apt install -y software-properties-common wget
+  apt install -y apt-transport-https ca-certificates software-properties-common wget
   wget -q -O - https://packages.grafana.com/gpg.key | apt-key add -
   echo "deb https://apt.grafana.com stable main" > /etc/apt/sources.list.d/grafana.list
   apt update
