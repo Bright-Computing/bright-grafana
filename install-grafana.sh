@@ -3,6 +3,9 @@
 source /etc/os-release
 if [ "${ID}" = "rhel" ] || [[ "${ID_LIKE}" =~ .*"rhel".* ]]; then
   echo "Installing Grafana OSS repo and latest stable version"
+  if [[ "$VERSION_ID" =~ ^9.[0-9]$ ]]; then
+    update-crypto-policies --set DEFAULT:SHA1
+  fi
   cat > /etc/yum.repos.d/grafana-oss.repo <<ENDF
 [grafana]
 name=grafana
@@ -14,7 +17,10 @@ gpgkey=https://packages.grafana.com/gpg.key
 sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 ENDF
-  yum -y install grafana 
+  yum -y install grafana
+  if [[ "$VERSION_ID" =~ ^9.[0-9]$ ]]; then
+    update-crypto-policies --set DEFAULT
+  fi
   echo "Complete"
 elif [ "${ID}" = "sles" ]; then
   version=$(wget -qO- 'https://api.github.com/repos/grafana/grafana/releases/latest' | grep tag_name | sed -e 's/^.*tag_name\":.*\"v\(.*\)".*/\1/')
