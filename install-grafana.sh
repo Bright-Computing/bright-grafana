@@ -4,7 +4,12 @@ source /etc/os-release
 if [ "${ID}" = "rhel" ] || [[ "${ID_LIKE}" =~ .*"rhel".* ]]; then
   echo "Installing Grafana OSS repo and latest stable version"
   if [[ "$VERSION_ID" =~ ^9.[0-9]$ ]]; then
-    update-crypto-policies --set DEFAULT:SHA1
+    old_crypto_policies=$(update-crypto-policies --show)
+    if [[ "$old_crypto_policies" =~ SHA1 ]]; then
+      old_crypto_policies=""
+    else
+      update-crypto-policies --set DEFAULT:SHA1
+    fi
   fi
   cat > /etc/yum.repos.d/grafana-oss.repo <<ENDF
 [grafana]
@@ -18,8 +23,8 @@ sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 ENDF
   yum -y install grafana
-  if [[ "$VERSION_ID" =~ ^9.[0-9]$ ]]; then
-    update-crypto-policies --set DEFAULT
+  if [[ ! -z "$old_crypto_policies" ]]; then
+    update-crypto-policies --set "$old_crypto_policies"
   fi
   echo "Complete"
 elif [ "${ID}" = "sles" ]; then
