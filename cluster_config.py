@@ -128,6 +128,7 @@ class ClusterConfig:
                 profile.nonuser = True
                 profile.accessServices = ['CMMon']
                 profile.tokens = ['PLOT_TOKEN',
+                                  'PROMETHEUS_EXPORTER_TOKEN',
                                   'PRIVATE_MONITORING_TOKEN',
                                   'GET_LABELED_ENTITY_TOKEN']
                 commit_result = profile.commit()
