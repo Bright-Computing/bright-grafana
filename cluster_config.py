@@ -62,6 +62,7 @@ class ClusterConfig:
                 'port': self.port,
                 'name': self.name,
                 'version': self.version,
+                'build_index': self.build_index,
                 'certificate': self.certificate,
                 'private_key': self.private_key}
 
