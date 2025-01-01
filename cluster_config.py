@@ -80,8 +80,10 @@ class ClusterConfig:
         if bool(self.build_index) and self.build_index > 148338:
             return '/cm/local/apps/cmd/pythoncm/lib/python3.9/site-packages/pythoncm'
         if self.version in ['9.2', '10.0']:
+            if bool(self.build_index) and self.build_index > 148338:
+                return '/cm/local/apps/cmd/pythoncm/lib/python3.9/site-packages/pythoncm'
             return '/cm/local/apps/python39/lib/python3.9/site-packages/pythoncm'
-        return '/cm/local/apps/python312/lib/python3.12/site-packages/pythoncm'
+        return '/cm/local/apps/cmd/pythoncm/lib/python3.12/site-packages/pythoncm'
 
     @property
     def pythoncm_directory(self):
