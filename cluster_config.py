@@ -15,7 +15,7 @@ class ClusterConfig:
         self.build_index = None
         self.certificate = None
         self.private_key = None
-        self.ca_file = 'pythoncm/etc/cacert.pem'
+        self.ca_file = "pythoncm/etc/cacert.pem"
 
     def get_cluster(self, auto_connect=False, redirect=False):
         self.create_symlink()
@@ -33,61 +33,63 @@ class ClusterConfig:
                        follow_redirect=Cluster.REDIRECT_ACTIVE if redirect else Cluster.REDIRECT_NONE)
 
     def get_version(self):
-        url = f'https://{self.hostname}:{self.port}/info/version'
+        url = f"https://{self.hostname}:{self.port}/info/version"
         opener = urllib.request.build_opener(HTTPSClientAuthHandler(),
                                              urllib.request.ProxyHandler({}))
         request = urllib.request.Request(url)
         try:
             response = opener.open(request)
-            self.version = response.read().decode('utf-8')
+            self.version = response.read().decode("utf-8").strip()
+            print(f"cmdaemon version: {self.version}")
             return len(self.version) > 0
         except urllib.error.URLError as e:
             print(e)
             return False
 
     def get_build_index(self):
-        url = f'https://{self.hostname}:{self.port}/info/build_index'
+        url = f"https://{self.hostname}:{self.port}/info/build_index"
         opener = urllib.request.build_opener(HTTPSClientAuthHandler(),
                                              urllib.request.ProxyHandler({}))
         request = urllib.request.Request(url)
         try:
             response = opener.open(request)
-            self.build_index = int(response.read().decode('utf-8'))
+            self.build_index = int(response.read().decode("utf-8"))
+            print(f"cmdaemon build index: {self.build_index}")
             return True
         except urllib.error.URLError:
             return False
 
     def save(self):
-        return {'hostname': self.hostname,
-                'port': self.port,
-                'name': self.name,
-                'version': self.version,
-                'certificate': self.certificate,
-                'private_key': self.private_key}
+        return {
+            "hostname": self.hostname,
+            "port": self.port,
+            "name": self.name,
+            "version": self.version,
+            "certificate": self.certificate,
+            "private_key": self.private_key,
+        }
 
     @property
     def python_version(self):
-        if self.version == '8.2':
+        if self.version == "8.2":
             return 2
         return 3
 
     @property
     def cluster_pythoncm_directory(self):
-        if self.version == '8.2':
-            return '/cm/local/apps/python2/lib/python2.7/site-packages/pythoncm'
-        if self.version in ['9.0', '9.1']:
-            return '/cm/local/apps/python37/lib/python3.7/site-packages/pythoncm'
-        if bool(self.build_index) and self.build_index > 148338:
-            return '/cm/local/apps/cmd/pythoncm/lib/python3.9/site-packages/pythoncm'
-        if self.version in ['9.2', '10.0']:
-            if bool(self.build_index) and self.build_index > 148338:
-                return '/cm/local/apps/cmd/pythoncm/lib/python3.9/site-packages/pythoncm'
-            return '/cm/local/apps/python39/lib/python3.9/site-packages/pythoncm'
-        return '/cm/local/apps/cmd/pythoncm/lib/python3.12/site-packages/pythoncm'
+        if self.version == "8.2":
+            return "/cm/local/apps/python2/lib/python2.7/site-packages/pythoncm"
+        if self.version in ("9.0", "9.1"):
+            return "/cm/local/apps/python37/lib/python3.7/site-packages/pythoncm"
+        if self.version in ("9.2", "10.0"):
+            if bool(self.build_index) and self.build_index <= 148338:
+                return "/cm/local/apps/python39/lib/python3.9/site-packages/pythoncm"
+            return "/cm/local/apps/cmd/pythoncm/lib/python3.9/site-packages/pythoncm"
+        return "/cm/local/apps/cmd/pythoncm/lib/python3.12/site-packages/pythoncm"
 
     @property
     def pythoncm_directory(self):
-        return f'pythoncm_{self.version.replace(".","")}'
+        return f"pythoncm_{self.version.replace(".","")}"
 
     @classmethod
     def load(cls, data):
@@ -96,7 +98,7 @@ class ClusterConfig:
             setattr(cluster, key, value)
         return cluster
 
-    def create_symlink(self, target='pythoncm'):
+    def create_symlink(self, target="pythoncm"):
         if os.path.exists(target):
             if os.path.islink(target):
                 if os.readlink(target) == self.pythoncm_directory:
@@ -104,15 +106,15 @@ class ClusterConfig:
                 os.remove(target)
             else:
                 raise FileExistsError
-        print(f'*** Switch to {self.pythoncm_directory} ***')
+        print(f"*** Switch to {self.pythoncm_directory} ***")
         # unload all old pythoncm modules, to make sure we load the new ones after this
         for name in list(sys.modules.keys()):
-            if name.startswith('pythoncm.'):
+            if name.startswith("pythoncm."):
                 del sys.modules[name]
         os.symlink(self.pythoncm_directory, target)
         return True
 
-    def create_certificate(self, username, password, name='grafana', profile_name='grafana'):
+    def create_certificate(self, username, password, name="grafana", profile_name="grafana"):
         self.create_symlink()
 
         from pythoncm.cluster import Cluster
@@ -124,30 +126,30 @@ class ClusterConfig:
                             ca_file=self.ca_file)
         if settings.get_cookie(username, password):
             cluster = Cluster(settings, follow_redirect=Cluster.REDIRECT_NONE)
-            profile = cluster.get_by_name(profile_name, 'Profile')
+            profile = cluster.get_by_name(profile_name, "Profile")
             result = True
             if profile is None:
                 profile = Profile(cluster)
                 profile.name = profile_name
                 profile.nonuser = True
-                profile.accessServices = ['CMMon']
-                profile.tokens = ['PLOT_TOKEN',
-                                  'PROMETHEUS_EXPORTER_TOKEN',
-                                  'PRIVATE_MONITORING_TOKEN',
-                                  'GET_LABELED_ENTITY_TOKEN']
+                profile.accessServices = ["CMMon"]
+                profile.tokens = ["PLOT_TOKEN",
+                                  "PROMETHEUS_EXPORTER_TOKEN",
+                                  "PRIVATE_MONITORING_TOKEN",
+                                  "GET_LABELED_ENTITY_TOKEN"]
                 commit_result = profile.commit()
                 if not commit_result.good:
-                    print(f'*** Failed to create {profile_name} profile ***')
+                    print(f"*** Failed to create {profile_name} profile ***")
                     print(commit_result)
                     result = False
             if result:
                 certificate = Certificate(cluster)
                 if certificate.create(name, profile=profile_name):
                     self.name = cluster.name
-                    self.certificate = f'{self.name}.pem'
-                    self.private_key = f'{self.name}.key'
+                    self.certificate = f"{self.name}.pem"
+                    self.private_key = f"{self.name}.key"
                     certificate.save(filename=self.certificate, private_key_file=self.private_key)
-                    print(f'*** Saved {name} certificate for cluster {self.name} with profile {profile_name} ***')
+                    print(f"*** Saved {name} certificate for cluster {self.name} with profile {profile_name} ***")
                 else:
                     result = False
             cluster.disconnect()
@@ -156,19 +158,19 @@ class ClusterConfig:
             raise IOError(settings.cookie)
 
     def update_datasource(self, path):
-        filename = f'{path}/{self.name}.yaml'
-        with open(filename, 'w') as fd:
+        filename = f"{path}/{self.name}.yaml"
+        with open(filename, "w") as fd:
             fd.write(self._datasource)
-        print(f'*** Saved {filename} ***')
+        print(f"*** Saved {filename} ***")
 
     def _read_file(self, filename, indent=0):
-        with open(filename, 'r') as fd:
-            lines = [' ' * indent + it for it in fd.readlines()]
-        return ''.join(lines)
+        with open(filename, "r") as fd:
+            lines = [" " * indent + it for it in fd.readlines()]
+        return "".join(lines)
 
     @property
     def _datasource(self):
-        return f'''# created by bright-grafana
+        return f"""# created by bright-grafana
 apiVersion: 1
 
 datasources:
@@ -196,4 +198,4 @@ datasources:
 {self._read_file(self.certificate, indent=6)}
     tlsClientKey: |
 {self._read_file(self.private_key, indent=6)}
-'''
+"""

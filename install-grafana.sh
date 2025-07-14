@@ -22,10 +22,11 @@ gpgkey=https://packages.grafana.com/gpg.key
 sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 ENDF
-  yum -y install grafana
   if [[ ! -z "$old_crypto_policies" ]]; then
     update-crypto-policies --set "$old_crypto_policies"
   fi
+  yum -y install grafana
+  pip install lxml passlib tabulate
   echo "Complete"
 elif [ "${ID}" = "sles" ]; then
   version=$(wget -qO- 'https://api.github.com/repos/grafana/grafana/releases/latest' | grep tag_name | sed -e 's/^.*tag_name\":.*\"v\(.*\)".*/\1/')
@@ -98,3 +99,6 @@ EOF
     fi
   fi
 fi
+
+echo "Install potentially missing python libraries"
+pip install lxml passlib tabulate pyOpenSSL
